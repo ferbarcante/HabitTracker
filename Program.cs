@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Data;
+using System.Data.Common;
+using System.Globalization;
 using System.Runtime.InteropServices;
 using Microsoft.Data.Sqlite;
 using Microsoft.VisualBasic.FileIO;
@@ -80,6 +82,39 @@ namespace HabitTrackerApp
 
         static void GetAll()
         {
+            Console.Clear();
+            using (var connection = new SqliteConnection(connectionString))
+            {
+                connection.Open();
+                var tableCmd = connection.CreateCommand();
+
+                tableCmd.CommandText = 
+                        $"SELECT * FROM drinkin_water";
+
+                
+                List<DrinkingWater> tableData = new();
+
+                SqliteDataReader reader = tableCmd.ExecuteReader();
+
+                if (reader.HasRows)
+                {
+                    
+                    while (reader.Read())
+                    {
+                        tableData.Add(
+                        new DrinkingWater
+                        {
+                            Id = reader.GetInt32(0),
+                            Date = DateTime.ParseExact(reader.GetString(1), "dd-MM-yy", new CultureInfo("pt-BR")),
+                            Quantity = reader.GetInt32(2)
+                        });
+                    }
+                }
+                else 
+                {
+
+                }
+            }
 
         }
 
@@ -117,7 +152,7 @@ namespace HabitTrackerApp
 
         internal static string GetDateInput()
         {
-            Console.WriteLine("Please enter the date (dd/mm/yyyy). Type 0 to return to main menu: ");
+            Console.WriteLine("Please enter the date (dd-mm-yyyy). Type 0 to return to main menu: ");
             string dateInput = Console.ReadLine();
             
             if (dateInput == "0") GetUserInput();
@@ -137,5 +172,11 @@ namespace HabitTrackerApp
         }
     }
 
+    public class DrinkingWater
+    {
+        public int Id { get; set; }
+        public DateTime Date { get; set; }
+        public int Quantity {   get; set; }
+    }
     
 }
