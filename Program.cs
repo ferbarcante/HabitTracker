@@ -9,9 +9,10 @@ namespace HabitTrackerApp
 {
     class Program
     {
+        static string connectionString = @"Data Source=HabitTrackerApp.db";
+
         static void Main(string[] args)
         {
-            string connectionString = @"Data Source=HabitTrackerApp.db";
 
             using (var connection = new SqliteConnection(connectionString))
             {
@@ -29,6 +30,9 @@ namespace HabitTrackerApp
 
                 connection.Close();
             }
+
+            GetUserInput();
+
         }
 
         static void GetUserInput()
@@ -36,7 +40,7 @@ namespace HabitTrackerApp
             Console.Clear();
             bool closeApp = false;
             
-            while (closeApp = false)
+            while (closeApp == false)
             {
                 Console.WriteLine("\n\nMAIN MENU");
                 Console.WriteLine("\nWhat would you like to do?");
@@ -50,20 +54,20 @@ namespace HabitTrackerApp
 
                 switch(commandInput)
                 {
-                    case 1:
+                    case "1":
                     // View all records
                         GetAll();
                         closeApp = true;
                         break;
-                    case 2:
+                    case "2":
                         Create();
                         closeApp = true;
                         break;
-                    case 3:
+                    case "3":
                         Delete();
                         closeApp = true;
                         break;
-                    case 4:
+                    case "4":
                         Update();
                         closeApp = true;
                         break; 
@@ -81,7 +85,24 @@ namespace HabitTrackerApp
 
         static void Create()
         {
+            string date = GetDateInput();
+
+            int quantity = GetNumberInput("\n\nPlease insert a number of glasses or other measure of your choice (no decimals allowed).\n\n");
             
+            using (var connection = new SqliteConnection(connectionString))
+            {
+                connection.Open();
+                var tableCmd = connection.CreateCommand();
+
+                tableCmd.CommandText = 
+                        $"INSERT INTO drinking_water(date, quantity) VALUES ('{date}', {quantity})";
+
+                tableCmd.ExecuteNonQuery();
+
+                connection.Close();
+            }
+
+        
         }
 
         static void Delete()
@@ -92,6 +113,27 @@ namespace HabitTrackerApp
         static void Update()
         {
 
+        }
+
+        internal static string GetDateInput()
+        {
+            Console.WriteLine("Please enter the date (dd/mm/yyyy). Type 0 to return to main menu: ");
+            string dateInput = Console.ReadLine();
+            
+            if (dateInput == "0") GetUserInput();
+            return dateInput;
+        }
+
+        internal static int GetNumberInput(string message)
+        {
+            Console.WriteLine(message);
+            string numberInput = Console.ReadLine();
+
+            if(numberInput == "0") GetUserInput();
+
+            int finalInput = Convert.ToInt32(numberInput);
+            return finalInput;
+            
         }
     }
 
