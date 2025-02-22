@@ -112,8 +112,18 @@ namespace HabitTrackerApp
                 }
                 else 
                 {
-
+                    Console.WriteLine("No rows found");
                 }
+
+                connection.Close();
+
+                Console.WriteLine("---------------------------------------------------\n");
+                foreach (var dw in tableData)
+                {
+                    Console.WriteLine($"{dw.Id} - {dw.Date.ToString("dd-MM-yyyy")} - Quantity: {dw.Quantity}");
+                }
+                Console.WriteLine("---------------------------------------------------\n");
+
             }
 
         }
@@ -142,7 +152,29 @@ namespace HabitTrackerApp
 
         static void Delete()
         {
+            Console.Clear();
+            GetAll();
 
+            var recordId = GetNumberInput("\n\nPlease type the Id of the record you want to delete");
+
+            using (var connection = new SqliteConnection(connectionString))
+            {
+                connection.Open();
+                var tableCmd = connection.CreateCommand();
+
+                tableCmd.CommandText = 
+                        $"DELETE FROM drinking_water WHERE id = {recordId}";
+
+                int rowCount = tableCmd.ExecuteNonQuery();
+                if(rowCount == 0)
+                {
+                    Console.WriteLine("\n\nRecord with Id {recordId} does not exist.");
+                    Delete();
+                }
+
+                Console.WriteLine("\n\nRecord with Id {recordId} was deleted successfully.");
+            
+            }
         }
 
         static void Update()
