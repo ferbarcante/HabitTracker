@@ -179,7 +179,35 @@ namespace HabitTrackerApp
 
         static void Update()
         {
+            Console.Clear();
+            GetAll();
 
+            var recordId = GetNumberInput("\n\nPlease type the Id of the record you want to update");
+
+            using (var connection = new SqliteConnection(connectionString))
+            {
+                connection.Open();
+
+                var checkCmd = connection.CreateCommand();
+                checkCmd.CommandText = $"SELECT * FROM drinking_water WHERE id = {recordId}";
+                int checkQuery = Convert.ToInt32(checkCmd.ExecuteScalar());
+          
+                if(checkQuery == 0)
+                {
+                    Console.WriteLine("\n\nRecord with Id {recordId} does not exist.");
+                    connection.Close();
+                    Update();
+                }
+
+                string date = GetDateInput();
+                int quantity = GetNumberInput("\n\nPlease insert a number of glasses or other measure of your choice (no decimals allowed). Type 0 to return to main menu: ");
+
+                var tableCmd = connection.CreateCommand();
+                tableCmd.CommandText = $"UPDATE drinking_water SET date = '{date}', quantity = {quantity} WHERE Id = {recordId}";
+
+                tableCmd.ExecuteNonQuery();
+                connection.Close();
+            }
         }
 
         internal static string GetDateInput()
